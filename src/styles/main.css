@@ -1,0 +1,36 @@
+body {
+  margin: 0;
+  font-family: Arial, Helvetica, sans-serif;
+  background: #f5f7fb;
+}
+
+h1,
+h2,
+h3 {
+  color: #1f2937;
+}
+
+button {
+  cursor: pointer;
+}
+
+textarea,
+input {
+  font-family: inherit;
+}
+.input,
+.textarea,
+select {
+  width: 100%;
+  padding: 14px;
+  margin-bottom: 15px;
+  border-radius: 6px;
+  border: 1px solid #ccc;
+  font-size: 15px;
+  box-sizing: border-box; /* ⭐ FIX */
+}
+
+.textarea {
+  min-height: 110px;
+  resize: vertical;
+}
