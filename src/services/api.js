@@ -1,7 +1,7 @@
 import axios from "axios";
 
 const api = axios.create({
-  baseURL: "http://localhost:8080/api",
+  baseURL: "https://idea-forge-backend.onrender.com/api",
 });
 
 // Attach JWT token automatically

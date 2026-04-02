@@ -1,9 +1,8 @@
 import axios from "axios";
 
-const API = "http://localhost:8080/api/notifications";
+const API = "https://idea-forge-backend.onrender.com/api/notifications";
 
 export const getNotifications = async (username) => {
   const res = await fetch(`${API}/${username}`);
-
   return res.json();
 };

@@ -1,6 +1,8 @@
 import React, { useEffect, useState } from "react";
 import IdeaCard from "../components/IdeaCard";
 
+const BASE_URL = "https://idea-forge-backend.onrender.com";
+
 const Explore = () => {
   const [ideas, setIdeas] = useState([]);
   const [searchText, setSearchText] = useState("");
@@ -12,7 +14,7 @@ const Explore = () => {
 
   const loadIdeas = async () => {
     try {
-      const res = await fetch("http://localhost:8080/api/ideas");
+      const res = await fetch(`${BASE_URL}/api/ideas`);
       const data = await res.json();
       setIdeas(data);
     } catch (error) {
@@ -30,7 +32,7 @@ const Explore = () => {
 
     try {
       const res = await fetch(
-        `http://localhost:8080/api/ideas/search?keyword=${encodeURIComponent(text)}`
+        `${BASE_URL}/api/ideas/search?keyword=${encodeURIComponent(text)}`,
       );
 
       const data = await res.json();
@@ -56,7 +58,7 @@ const Explore = () => {
 
     try {
       const res = await fetch(
-        `http://localhost:8080/api/ideas/category?category=${encodeURIComponent(cat)}`
+        `${BASE_URL}/api/ideas/category?category=${encodeURIComponent(cat)}`,
       );
 
       const data = await res.json();
@@ -74,11 +76,13 @@ const Explore = () => {
 
   return (
     <div className="container fade-in">
-      <h2 className="page-title" style={{ marginBottom: "24px", fontSize: "32px" }}>
+      <h2
+        className="page-title"
+        style={{ marginBottom: "24px", fontSize: "32px" }}
+      >
         Explore Startup Ideas
       </h2>
 
-      {/* SEARCH BAR */}
       <input
         className="input"
         placeholder="Search ideas by title or keyword..."
@@ -86,7 +90,6 @@ const Explore = () => {
         onChange={(e) => searchIdeas(e.target.value)}
       />
 
-      {/* CATEGORY FILTER */}
       <select
         className="input select"
         value={category}
@@ -101,14 +104,26 @@ const Explore = () => {
         <option value="Education">Education</option>
       </select>
 
-      {/* IDEA LIST */}
       {ideas.length === 0 && (
-        <div style={{ textAlign: "center", padding: "40px", background: "var(--bg-glass)", borderRadius: "12px" }}>
+        <div
+          style={{
+            textAlign: "center",
+            padding: "40px",
+            background: "var(--bg-glass)",
+            borderRadius: "12px",
+          }}
+        >
           <p className="page-subtitle">No ideas found matching your search.</p>
         </div>
       )}
 
-      <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(320px, 1fr))", gap: "20px" }}>
+      <div
+        style={{
+          display: "grid",
+          gridTemplateColumns: "repeat(auto-fill, minmax(320px, 1fr))",
+          gap: "20px",
+        }}
+      >
         {ideas.map((idea) => (
           <IdeaCard key={idea.id} idea={idea} />
         ))}
