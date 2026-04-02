@@ -5,7 +5,8 @@ const BASE_URL = "https://idea-forge-backend.onrender.com";
 function Profile() {
   const [requests, setRequests] = useState([]);
 
-  const user = JSON.parse(localStorage.getItem("user"));
+  const storedUser = localStorage.getItem("user");
+  const user = storedUser ? JSON.parse(storedUser) : null;
 
   useEffect(() => {
     if (!user) return;
@@ -13,9 +14,8 @@ function Profile() {
     fetch(`${BASE_URL}/api/collaborations/user/${user.name}`)
       .then((res) => res.json())
       .then((data) => {
-        if (Array.isArray(data)) {
-          setRequests(data);
-        }
+        // ✅ FIX
+        setRequests(Array.isArray(data) ? data : []);
       })
       .catch(() => setRequests([]));
   }, []);
@@ -31,69 +31,36 @@ function Profile() {
           gap: "12px",
         }}
       >
-        <div
-          className="avatar"
-          style={{ width: "48px", height: "48px", fontSize: "24px" }}
-        >
-          {user?.name?.charAt(0).toUpperCase()}
-        </div>
+        <div className="avatar">{user?.name?.charAt(0)?.toUpperCase()}</div>
         My Profile
       </h2>
 
       {user && (
-        <div
-          className="card"
-          style={{ maxWidth: "600px", marginBottom: "40px" }}
-        >
-          <div
-            style={{
-              display: "grid",
-              gridTemplateColumns: "100px 1fr",
-              gap: "16px",
-              rowGap: "24px",
-            }}
-          >
-            <b style={{ color: "var(--text-secondary)" }}>Name:</b>
-            <span>{user.name}</span>
-
-            <b style={{ color: "var(--text-secondary)" }}>Email:</b>
-            <span>{user.email}</span>
-
-            <b style={{ color: "var(--text-secondary)" }}>Skills:</b>
-            <span style={{ color: "var(--accent-primary)", fontWeight: "500" }}>
-              {user.skills || "Not provided"}
-            </span>
-
-            <b style={{ color: "var(--text-secondary)" }}>Reputation:</b>
-            <span className="tag" style={{ width: "fit-content", margin: "0" }}>
-              ⭐ {user.reputation ?? 0} RP
-            </span>
-          </div>
+        <div className="card">
+          <p>Name: {user?.name}</p>
+          <p>Email: {user?.email}</p>
+          <p>Skills: {user?.skills || "Not provided"}</p>
+          <p>⭐ {user?.reputation ?? 0} RP</p>
         </div>
       )}
 
-      <h3 style={{ marginTop: "40px", marginBottom: "20px" }}>
-        Collaboration Requests
-      </h3>
+      <h3>Collaboration Requests</h3>
 
-      {requests.length === 0 && (
-        <div className="card" style={{ textAlign: "center", padding: "40px" }}>
-          <p style={{ color: "var(--text-secondary)" }}>
-            No collaboration requests
-          </p>
+      {/* ✅ SAFE EMPTY CHECK */}
+      {!Array.isArray(requests) || requests.length === 0 ? (
+        <p>No collaboration requests</p>
+      ) : (
+        <div>
+          {requests.map((r, index) => (
+            <div key={index} className="card">
+              <p>
+                <b>{r?.requesterName}</b> requested collaboration
+              </p>
+              <p>"{r?.message || ""}"</p>
+            </div>
+          ))}
         </div>
       )}
-
-      <div style={{ display: "flex", flexDirection: "column", gap: "16px" }}>
-        {requests.map((r, index) => (
-          <div key={index} className="card">
-            <p style={{ fontSize: "16px", marginBottom: "8px" }}>
-              <b>{r.requesterName}</b> requested collaboration
-            </p>
-            <p style={{ color: "var(--text-secondary)" }}>"{r.message}"</p>
-          </div>
-        ))}
-      </div>
     </div>
   );
 }

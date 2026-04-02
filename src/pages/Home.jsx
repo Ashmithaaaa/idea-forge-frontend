@@ -13,9 +13,12 @@ const Home = () => {
   const loadIdeas = async () => {
     try {
       const data = await getTrendingIdeas();
-      setIdeas(data);
+
+      // ✅ FIX
+      setIdeas(Array.isArray(data) ? data : []);
     } catch (error) {
       console.error("Error loading trending ideas", error);
+      setIdeas([]); // ✅ fallback
     }
   };
 
@@ -24,7 +27,9 @@ const Home = () => {
       {/* HERO SECTION */}
       <div style={hero}>
         <div style={heroContent}>
-          <span className="tag" style={{ marginBottom: '24px' }}>✨ Community-driven idea validation</span>
+          <span className="tag" style={{ marginBottom: "24px" }}>
+            ✨ Community-driven idea validation
+          </span>
 
           <h1 style={title}>
             Validate Your Startup Ideas
@@ -34,14 +39,18 @@ const Home = () => {
 
           <p style={subtitle}>
             Share ideas, get feedback, discover innovation. Join thousands of
-            founders validating concepts with real community insights.
+            founders validating concepts.
           </p>
 
           <div style={buttons}>
-            <button className="primary-btn" style={{ padding: '16px 32px', fontSize: '16px' }} onClick={() => navigate("/submit")}>
+            <button className="primary-btn" onClick={() => navigate("/submit")}>
               Submit Idea →
             </button>
-            <button className="secondary-btn" style={{ padding: '16px 32px', fontSize: '16px' }} onClick={() => navigate("/explore")}>
+
+            <button
+              className="secondary-btn"
+              onClick={() => navigate("/explore")}
+            >
               Explore Ideas
             </button>
           </div>
@@ -50,72 +59,30 @@ const Home = () => {
 
       {/* TRENDING IDEAS */}
       <div className="container">
-        <h2 className="page-title" style={{ fontSize: '28px', marginBottom: '30px' }}>🔥 Trending Ideas</h2>
+        <h2 className="page-title">🔥 Trending Ideas</h2>
 
-        {ideas.length === 0 && <p className="page-subtitle">No ideas available</p>}
+        {/* ✅ SAFE EMPTY CHECK */}
+        {!Array.isArray(ideas) || ideas.length === 0 ? (
+          <p className="page-subtitle">No ideas available</p>
+        ) : (
+          ideas.map((idea) => (
+            <div key={idea.id} className="card">
+              <h3>{idea.title}</h3>
+              <p>{idea.problemStatement}</p>
 
-        {ideas.map((idea) => (
-          <div key={idea.id} className="card">
-            <h3 className="card-title">{idea.title}</h3>
-            <p className="card-desc">{idea.problemStatement}</p>
+              <div>
+                👍 {idea.votes ?? 0} | 👁 {idea.views ?? 0}
+              </div>
 
-            <div className="card-stats">
-              <span>👍 {idea.votes ?? 0}</span>
-              <span>👁 {idea.views ?? 0}</span>
+              <button onClick={() => navigate(`/idea/${idea.id}`)}>
+                View Details →
+              </button>
             </div>
-
-            <button
-              className="card-btn"
-              style={{ marginTop: '16px' }}
-              onClick={() => navigate(`/idea/${idea.id}`)}
-            >
-              View Details →
-            </button>
-          </div>
-        ))}
+          ))
+        )}
       </div>
     </div>
   );
 };
 
 export default Home;
-
-/* ---------- STYLES ---------- */
-
-const hero = {
-  padding: "120px 20px",
-  textAlign: "center",
-  position: "relative",
-  overflow: "hidden",
-};
-
-const heroContent = {
-  maxWidth: "900px",
-  margin: "auto",
-  position: "relative",
-  zIndex: 1,
-};
-
-const title = {
-  fontSize: "56px",
-  fontWeight: "800",
-  letterSpacing: "-1.5px",
-  lineHeight: "1.1",
-  color: "var(--text-primary)",
-};
-
-const subtitle = {
-  fontSize: "20px",
-  color: "var(--text-secondary)",
-  marginTop: "24px",
-  lineHeight: "1.6",
-  maxWidth: "700px",
-  margin: "24px auto 0",
-};
-
-const buttons = {
-  marginTop: "40px",
-  display: "flex",
-  justifyContent: "center",
-  gap: "20px",
-};

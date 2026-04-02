@@ -16,9 +16,12 @@ const Explore = () => {
     try {
       const res = await fetch(`${BASE_URL}/api/ideas`);
       const data = await res.json();
-      setIdeas(data);
+
+      // ✅ FIX
+      setIdeas(Array.isArray(data) ? data : []);
     } catch (error) {
       console.error("Error loading ideas:", error);
+      setIdeas([]); // ✅ fallback
     }
   };
 
@@ -37,11 +40,7 @@ const Explore = () => {
 
       const data = await res.json();
 
-      if (Array.isArray(data)) {
-        setIdeas(data);
-      } else {
-        setIdeas([]);
-      }
+      setIdeas(Array.isArray(data) ? data : []);
     } catch (error) {
       console.error("Search error:", error);
       setIdeas([]);
@@ -63,11 +62,7 @@ const Explore = () => {
 
       const data = await res.json();
 
-      if (Array.isArray(data)) {
-        setIdeas(data);
-      } else {
-        setIdeas([]);
-      }
+      setIdeas(Array.isArray(data) ? data : []);
     } catch (error) {
       console.error("Category filter error:", error);
       setIdeas([]);
@@ -104,7 +99,8 @@ const Explore = () => {
         <option value="Education">Education</option>
       </select>
 
-      {ideas.length === 0 && (
+      {/* ✅ SAFE EMPTY CHECK */}
+      {!Array.isArray(ideas) || ideas.length === 0 ? (
         <div
           style={{
             textAlign: "center",
@@ -115,19 +111,19 @@ const Explore = () => {
         >
           <p className="page-subtitle">No ideas found matching your search.</p>
         </div>
+      ) : (
+        <div
+          style={{
+            display: "grid",
+            gridTemplateColumns: "repeat(auto-fill, minmax(320px, 1fr))",
+            gap: "20px",
+          }}
+        >
+          {ideas.map((idea) => (
+            <IdeaCard key={idea.id} idea={idea} />
+          ))}
+        </div>
       )}
-
-      <div
-        style={{
-          display: "grid",
-          gridTemplateColumns: "repeat(auto-fill, minmax(320px, 1fr))",
-          gap: "20px",
-        }}
-      >
-        {ideas.map((idea) => (
-          <IdeaCard key={idea.id} idea={idea} />
-        ))}
-      </div>
     </div>
   );
 };

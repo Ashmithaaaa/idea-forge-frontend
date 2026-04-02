@@ -34,61 +34,59 @@ const IdeaDetails = () => {
   // =========================
   // LOAD IDEA
   // =========================
-
   const loadIdea = async () => {
     try {
       const data = await getIdeaById(id);
-      setIdea(data);
+      setIdea(data || null); // ✅ safe
     } catch (error) {
       console.error("Error loading idea:", error);
+      setIdea(null);
     }
   };
 
   // =========================
   // LOAD SIMILAR IDEAS
   // =========================
-
   const loadSimilarIdeas = async () => {
     try {
       const data = await getSimilarIdeas(id);
-      setSimilarIdeas(data);
+      setSimilarIdeas(Array.isArray(data) ? data : []); // ✅ safe
     } catch (error) {
       console.error("Error loading similar ideas:", error);
+      setSimilarIdeas([]);
     }
   };
 
   // =========================
   // LOAD MATCHED USERS
   // =========================
-
   const loadMatches = async () => {
     try {
       const data = await getMatchingUsers(id);
-      console.log("MATCH USERS:", data);
-      setMatchedUsers(data);
+      setMatchedUsers(Array.isArray(data) ? data : []); // ✅ safe
     } catch (error) {
       console.error("Match error", error);
+      setMatchedUsers([]);
     }
   };
 
   // =========================
   // COLLABORATION REQUEST
   // =========================
-
   const handleCollaboration = async () => {
     if (!username) {
       alert("Please login first");
       return;
     }
 
-    if (username === idea.authorName) {
+    if (username === idea?.authorName) {
       alert("You cannot collaborate on your own idea");
       return;
     }
 
     try {
       await sendCollaborationRequest({
-        ideaId: idea.id,
+        ideaId: idea?.id,
         requesterName: username,
         requesterEmail: user?.email || "",
         requesterSkills: user?.skills || "",
@@ -101,10 +99,6 @@ const IdeaDetails = () => {
     }
   };
 
-  // =========================
-  // INVITE FROM RECOMMENDED LIST
-  // =========================
-
   const sendInvite = async (collabUser) => {
     if (!username) {
       alert("Please login first");
@@ -113,7 +107,7 @@ const IdeaDetails = () => {
 
     try {
       await sendCollaborationRequest({
-        ideaId: idea.id,
+        ideaId: idea?.id,
         requesterName: username,
         requesterEmail: user?.email || "",
         requesterSkills: user?.skills || "",
@@ -138,121 +132,89 @@ const IdeaDetails = () => {
   return (
     <div className="container fade-in">
       {/* HEADER */}
-
       <div className="card">
-        <h1 className="page-title" style={{ fontSize: "36px" }}>{idea.title}</h1>
+        <h1 className="page-title">{idea.title}</h1>
 
-        <div className="card-stats" style={{ borderTop: "none", paddingTop: "0", marginTop: "12px" }}>
-          <span>👍 {idea.votes} Votes</span>
-          <span style={{ marginLeft: "20px" }}>👁 {idea.views} Views</span>
-          <span style={{ marginLeft: "20px" }} className="tag">🏷 {idea.category}</span>
+        <div className="card-stats">
+          <span>👍 {idea?.votes ?? 0} Votes</span>
+          <span>👁 {idea?.views ?? 0} Views</span>
+          <span className="tag">🏷 {idea?.category}</span>
         </div>
 
-        <p style={{ marginTop: "16px", color: "var(--text-secondary)" }}>
-          Created by <b style={{ color: "var(--text-primary)" }}>{idea.authorName}</b>
+        <p>
+          Created by <b>{idea?.authorName}</b>
         </p>
       </div>
 
-      {/* MAIN GRID */}
-
-      <div style={{ display: "grid", gridTemplateColumns: "2fr 1fr", gap: "24px" }}>
-        {/* LEFT SIDE */}
-
+      {/* MAIN */}
+      <div
+        style={{ display: "grid", gridTemplateColumns: "2fr 1fr", gap: "24px" }}
+      >
         <div className="card">
-          <Section title="📌 Problem Statement" text={idea.problemStatement} />
-          <Section title="💡 Proposed Solution" text={idea.proposedSolution} />
-          <Section title="🎯 Target Audience" text={idea.targetAudience} />
-          <Section title="⚙ Technology Stack" text={idea.technologyStack} />
+          <Section title="📌 Problem Statement" text={idea?.problemStatement} />
+          <Section title="💡 Proposed Solution" text={idea?.proposedSolution} />
+          <Section title="🎯 Target Audience" text={idea?.targetAudience} />
+          <Section title="⚙ Technology Stack" text={idea?.technologyStack} />
 
-          {/* TEAM MEMBERS */}
-          <h3 style={{ marginTop: "30px", marginBottom: "16px" }}>👥 Team Members</h3>
+          {/* TEAM */}
+          <h3>👥 Team Members</h3>
 
           <div style={{ display: "flex", gap: "10px", flexWrap: "wrap" }}>
-            <span className="tag" style={{ background: "rgba(251, 191, 36, 0.2)", color: "#fbbf24", border: "1px solid rgba(251, 191, 36, 0.3)" }}>
-              👑 {idea.authorName} (Owner)
-            </span>
+            <span className="tag">👑 {idea?.authorName} (Owner)</span>
 
-            {idea.contributors && idea.contributors.length > 0 ? (
+            {Array.isArray(idea?.contributors) &&
+            idea.contributors.length > 0 ? (
               idea.contributors.map((c, i) => (
                 <span key={i} className="tag">
                   👤 {c}
                 </span>
               ))
             ) : (
-              <p style={{ color: "var(--text-secondary)", fontSize: "14px", marginTop: "6px" }}>No collaborators yet</p>
+              <p>No collaborators yet</p>
             )}
           </div>
         </div>
 
-        {/* RIGHT PANEL */}
+        {/* RIGHT */}
+        <div>
+          <VoteButtons ideaId={idea?.id} initialVotes={idea?.votes} />
 
-        <div style={{ display: 'flex', flexDirection: 'column', gap: '24px' }}>
-          <div className="card" style={{ marginBottom: "0" }}>
-            <h3 style={{ marginBottom: "20px" }}>Idea Actions</h3>
+          {username !== idea?.authorName && (
+            <button onClick={handleCollaboration}>
+              🤝 Request Collaboration
+            </button>
+          )}
 
-            <VoteButtons ideaId={idea.id} initialVotes={idea.votes} />
-
-            {username !== idea.authorName && (
-              <button className="primary-btn" style={{ width: "100%", marginTop: "20px" }} onClick={handleCollaboration}>
-                🤝 Request Collaboration
-              </button>
-            )}
-          </div>
-
-          <div className="card" style={{ marginBottom: "0" }}>
-            <h3 style={{ marginBottom: "20px" }}>⚠ Similar Ideas</h3>
-
-            {similarIdeas.length === 0 ? (
-              <p style={{ color: "var(--text-secondary)", fontSize: "14px" }}>No similar ideas found</p>
-            ) : (
-              <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
-                {similarIdeas.map((s) => (
-                  <Link key={s.id} to={`/idea/${s.id}`} style={{ color: "var(--accent-primary)", textDecoration: "none", fontWeight: "500", fontSize: "15px" }}>
-                    • {s.title}
-                  </Link>
-                ))}
-              </div>
-            )}
-          </div>
+          {/* SIMILAR IDEAS */}
+          <h3>Similar Ideas</h3>
+          {!Array.isArray(similarIdeas) || similarIdeas.length === 0 ? (
+            <p>No similar ideas</p>
+          ) : (
+            similarIdeas.map((s) => (
+              <Link key={s.id} to={`/idea/${s.id}`}>
+                {s.title}
+              </Link>
+            ))
+          )}
         </div>
       </div>
 
       {/* COMMENTS */}
+      <CommentSection ideaId={idea?.id} />
 
-      <div className="card" style={{ marginTop: "24px" }}>
-        <h3 style={{ marginBottom: "20px" }}>💬 Comments</h3>
-        <CommentSection ideaId={idea.id} />
-      </div>
+      {/* MATCHED USERS */}
+      <h3>Recommended Collaborators</h3>
 
-      {/* RECOMMENDED COLLABORATORS */}
-
-      <div className="card" style={{ marginTop: "24px" }}>
-        <h3 style={{ marginBottom: "20px" }}>Recommended Collaborators</h3>
-
-        {matchedUsers.length === 0 ? (
-          <p style={{ color: "var(--text-secondary)" }}>No matches found</p>
-        ) : (
-          <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(220px, 1fr))", gap: "20px" }}>
-            {matchedUsers.map((user) => (
-              <div key={user.id} style={{ background: "rgba(255,255,255,0.03)", border: "1px solid var(--border-color)", borderRadius: "12px", padding: "20px", textAlign: "center" }}>
-                <div className="avatar" style={{ margin: "0 auto 12px auto" }}>
-                  {user.name?.charAt(0).toUpperCase()}
-                </div>
-
-                <h4 style={{ marginBottom: "8px", fontSize: "16px" }}>{user.name}</h4>
-
-                <p style={{ fontSize: "13px", color: "var(--text-secondary)", marginBottom: "16px", lineHeight: "1.4" }}>
-                  <strong style={{ color: "var(--text-primary)" }}>Skills:</strong> {user.skills}
-                </p>
-
-                <button className="secondary-btn" style={{ width: "100%", padding: "8px" }} onClick={() => sendInvite(user)}>
-                  Invite
-                </button>
-              </div>
-            ))}
+      {!Array.isArray(matchedUsers) || matchedUsers.length === 0 ? (
+        <p>No matches found</p>
+      ) : (
+        matchedUsers.map((user) => (
+          <div key={user.id}>
+            <p>{user.name}</p>
+            <button onClick={() => sendInvite(user)}>Invite</button>
           </div>
-        )}
-      </div>
+        ))
+      )}
     </div>
   );
 };
@@ -260,12 +222,9 @@ const IdeaDetails = () => {
 export default IdeaDetails;
 
 // =========================
-// REUSABLE SECTION
-// =========================
-
 const Section = ({ title, text }) => (
-  <div style={{ marginBottom: "24px" }}>
-    <h3 style={{ marginBottom: "10px", fontSize: "18px", color: "var(--text-primary)" }}>{title}</h3>
-    <p style={{ color: "var(--text-secondary)", lineHeight: "1.6", margin: "0" }}>{text || "Not provided"}</p>
+  <div>
+    <h3>{title}</h3>
+    <p>{text || "Not provided"}</p>
   </div>
 );
