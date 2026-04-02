@@ -24,15 +24,22 @@ const Login = () => {
         }),
       });
 
-      const data = await res.json();
+      // ✅ SAFE JSON PARSE
+      let data = null;
+      try {
+        data = await res.json();
+      } catch (err) {
+        console.warn("Invalid JSON response");
+      }
 
       if (!res.ok) {
-        alert("Login failed");
+        alert(data?.message || "Invalid email or password");
         return;
       }
 
-      localStorage.setItem("token", data.token);
-      localStorage.setItem("user", JSON.stringify(data.user));
+      // ✅ SAFE STORAGE
+      localStorage.setItem("token", data?.token || "");
+      localStorage.setItem("user", JSON.stringify(data?.user || {}));
 
       alert("Login successful");
       navigate("/");
@@ -62,10 +69,7 @@ const Login = () => {
           textAlign: "center",
         }}
       >
-        <h2
-          className="page-title"
-          style={{ fontSize: "28px", marginBottom: "32px" }}
-        >
+        <h2 className="page-title" style={{ marginBottom: "32px" }}>
           Welcome Back
         </h2>
 
@@ -90,30 +94,14 @@ const Login = () => {
 
           <button
             className="primary-btn"
-            style={{ width: "100%", marginTop: "16px", padding: "14px" }}
+            style={{ width: "100%", marginTop: "16px" }}
           >
             Login
           </button>
         </form>
 
-        <p
-          style={{
-            marginTop: "24px",
-            color: "var(--text-secondary)",
-            fontSize: "14px",
-          }}
-        >
-          Don't have an account?{" "}
-          <Link
-            to="/signup"
-            style={{
-              color: "var(--accent-primary)",
-              fontWeight: "600",
-              textDecoration: "none",
-            }}
-          >
-            Sign Up
-          </Link>
+        <p style={{ marginTop: "24px" }}>
+          Don't have an account? <Link to="/signup">Sign Up</Link>
         </p>
       </div>
     </div>
