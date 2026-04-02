@@ -1,83 +1,116 @@
 import React, { useState } from "react";
-import { signup } from "../services/authService";
 import { useNavigate, Link } from "react-router-dom";
+
+const BASE_URL = "https://idea-forge-backend.onrender.com";
 
 const Signup = () => {
   const navigate = useNavigate();
 
-  const [user, setUser] = useState({
-    name: "",
-    email: "",
-    password: "",
-    skills: "",
-  });
-
-  const handleChange = (e) => {
-    setUser({
-      ...user,
-      [e.target.name]: e.target.value,
-    });
-  };
+  const [name, setName] = useState("");
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [skills, setSkills] = useState("");
 
   const handleSignup = async (e) => {
     e.preventDefault();
 
-    const res = await signup(user);
+    try {
+      const res = await fetch(`${BASE_URL}/api/auth/signup`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
 
-    if (res.success === false) {
-      alert(res.message);
-      return;
+        // 🔥 MOST IMPORTANT FIX
+        body: JSON.stringify({
+          username: name, // ✅ backend expects username
+          email: email,
+          password: password,
+          skills: skills,
+        }),
+      });
+
+      // ✅ SAFE JSON PARSE
+      let data = null;
+      try {
+        data = await res.json();
+      } catch (err) {
+        console.warn("No JSON response");
+      }
+
+      if (!res.ok) {
+        alert(data?.message || "Signup failed");
+        return;
+      }
+
+      alert("Signup successful ✅");
+      navigate("/login");
+    } catch (error) {
+      console.error(error);
+      alert("Signup error ❌");
     }
-
-    alert("Signup successful");
-
-    navigate("/login");
   };
 
   return (
-    <div className="fade-in" style={{ display: "flex", justifyContent: "center", alignItems: "center", minHeight: "100vh", padding: "20px" }}>
-      <div className="card" style={{ width: "100%", maxWidth: "450px", padding: "40px 30px", textAlign: "center" }}>
-        <h2 className="page-title" style={{ fontSize: "28px", marginBottom: "32px" }}>Create Account</h2>
+    <div
+      className="fade-in"
+      style={{
+        display: "flex",
+        justifyContent: "center",
+        alignItems: "center",
+        minHeight: "100vh",
+      }}
+    >
+      <div
+        className="card"
+        style={{ maxWidth: "400px", width: "100%", padding: "30px" }}
+      >
+        <h2 className="page-title">Create Account</h2>
 
         <form onSubmit={handleSignup}>
           <input
             className="input"
-            name="name"
-            placeholder="Full Name"
-            onChange={handleChange}
+            placeholder="Name"
+            value={name}
+            onChange={(e) => setName(e.target.value)}
             required
           />
 
           <input
             className="input"
             type="email"
-            name="email"
-            placeholder="Email Address"
-            onChange={handleChange}
+            placeholder="Email"
+            value={email}
+            onChange={(e) => setEmail(e.target.value)}
             required
           />
 
           <input
             className="input"
-            name="password"
             type="password"
             placeholder="Password"
-            onChange={handleChange}
+            value={password}
+            onChange={(e) => setPassword(e.target.value)}
             required
           />
 
           <input
             className="input"
-            name="skills"
-            placeholder="Skills (e.g., React, Java, Marketing)"
-            onChange={handleChange}
+            placeholder="Skills"
+            value={skills}
+            onChange={(e) => setSkills(e.target.value)}
           />
 
-          <button className="primary-btn" style={{ width: "100%", marginTop: "16px", padding: "14px" }}>Sign Up</button>
+          <button
+            className="primary-btn"
+            style={{ width: "100%", marginTop: "16px" }}
+          >
+            Sign Up
+          </button>
         </form>
 
-        <p style={{ marginTop: "24px", color: "var(--text-secondary)", fontSize: "14px" }}>
-          Already have an account? <Link to="/login" style={{ color: "var(--accent-primary)", fontWeight: "600", textDecoration: "none" }}>Log In</Link>
+        <p style={{ marginTop: "16px" }}>
+          Already have an account? <Link to="/login">Login</Link>
         </p>
       </div>
     </div>
