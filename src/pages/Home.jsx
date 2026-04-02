@@ -13,33 +13,27 @@ const Home = () => {
   const loadIdeas = async () => {
     try {
       const data = await getTrendingIdeas();
-
-      // ✅ FIX
       setIdeas(Array.isArray(data) ? data : []);
     } catch (error) {
       console.error("Error loading trending ideas", error);
-      setIdeas([]); // ✅ fallback
+      setIdeas([]);
     }
   };
 
   return (
     <div className="fade-in">
-      {/* HERO SECTION */}
+      {/* HERO */}
       <div style={hero}>
         <div style={heroContent}>
-          <span className="tag" style={{ marginBottom: "24px" }}>
-            ✨ Community-driven idea validation
-          </span>
+          <span className="tag">✨ Community-driven idea validation</span>
 
           <h1 style={title}>
-            Validate Your Startup Ideas
-            <br />
+            Validate Your Startup Ideas <br />
             <span className="text-gradient">Before You Build Them</span>
           </h1>
 
           <p style={subtitle}>
-            Share ideas, get feedback, discover innovation. Join thousands of
-            founders validating concepts.
+            Share ideas, get feedback, discover innovation.
           </p>
 
           <div style={buttons}>
@@ -57,13 +51,12 @@ const Home = () => {
         </div>
       </div>
 
-      {/* TRENDING IDEAS */}
+      {/* TRENDING */}
       <div className="container">
         <h2 className="page-title">🔥 Trending Ideas</h2>
 
-        {/* ✅ SAFE EMPTY CHECK */}
         {!Array.isArray(ideas) || ideas.length === 0 ? (
-          <p className="page-subtitle">No ideas available</p>
+          <p>No ideas available</p>
         ) : (
           ideas.map((idea) => (
             <div key={idea.id} className="card">
@@ -75,7 +68,7 @@ const Home = () => {
               </div>
 
               <button onClick={() => navigate(`/idea/${idea.id}`)}>
-                View Details →
+                View →
               </button>
             </div>
           ))
@@ -86,3 +79,32 @@ const Home = () => {
 };
 
 export default Home;
+
+/* ✅ ADD THIS PART (THIS WAS MISSING) */
+
+const hero = {
+  padding: "100px 20px",
+  textAlign: "center",
+};
+
+const heroContent = {
+  maxWidth: "800px",
+  margin: "0 auto",
+};
+
+const title = {
+  fontSize: "48px",
+  fontWeight: "800",
+};
+
+const subtitle = {
+  marginTop: "20px",
+  fontSize: "18px",
+};
+
+const buttons = {
+  marginTop: "30px",
+  display: "flex",
+  gap: "10px",
+  justifyContent: "center",
+};
