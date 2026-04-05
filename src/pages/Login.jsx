@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { useNavigate, Link } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 
 const BASE_URL = "https://idea-forge-backend.onrender.com";
 
@@ -11,6 +11,8 @@ const Login = () => {
 
   const handleLogin = async (e) => {
     e.preventDefault();
+
+    console.log("Login clicked"); // ✅ debug
 
     try {
       const res = await fetch(`${BASE_URL}/api/auth/login`, {
@@ -24,86 +26,50 @@ const Login = () => {
         }),
       });
 
-      // ✅ SAFE JSON PARSE
-      let data = null;
+      console.log("Status:", res.status); // ✅ debug
+
+      let data = {};
       try {
         data = await res.json();
-      } catch (err) {
-        console.warn("Invalid JSON response");
-      }
+      } catch {}
 
       if (!res.ok) {
-        alert(data?.message || "Invalid email or password");
+        alert("Login failed");
         return;
       }
 
-      // ✅ SAFE STORAGE
-      localStorage.setItem("token", data?.token || "");
-      localStorage.setItem("user", JSON.stringify(data?.user || {}));
+      localStorage.setItem("token", data.token);
+      localStorage.setItem("user", JSON.stringify(data.user));
 
-      alert("Login successful");
+      alert("Login success");
       navigate("/");
-    } catch (error) {
-      console.error(error);
-      alert("Login error");
+    } catch (err) {
+      console.error(err);
+      alert("Server error");
     }
   };
 
   return (
-    <div
-      className="fade-in"
-      style={{
-        display: "flex",
-        justifyContent: "center",
-        alignItems: "center",
-        minHeight: "100vh",
-        padding: "20px",
-      }}
-    >
-      <div
-        className="card"
-        style={{
-          width: "100%",
-          maxWidth: "400px",
-          padding: "40px 30px",
-          textAlign: "center",
-        }}
-      >
-        <h2 className="page-title" style={{ marginBottom: "32px" }}>
-          Welcome Back
-        </h2>
+    <div className="container">
+      <h2>Welcome Back</h2>
 
-        <form onSubmit={handleLogin}>
-          <input
-            type="email"
-            className="input"
-            placeholder="Email"
-            value={email}
-            onChange={(e) => setEmail(e.target.value)}
-            required
-          />
+      <form onSubmit={handleLogin}>
+        <input
+          type="email"
+          placeholder="Email"
+          value={email}
+          onChange={(e) => setEmail(e.target.value)}
+        />
 
-          <input
-            type="password"
-            className="input"
-            placeholder="Password"
-            value={password}
-            onChange={(e) => setPassword(e.target.value)}
-            required
-          />
+        <input
+          type="password"
+          placeholder="Password"
+          value={password}
+          onChange={(e) => setPassword(e.target.value)}
+        />
 
-          <button
-            className="primary-btn"
-            style={{ width: "100%", marginTop: "16px" }}
-          >
-            Login
-          </button>
-        </form>
-
-        <p style={{ marginTop: "24px" }}>
-          Don't have an account? <Link to="/signup">Sign Up</Link>
-        </p>
-      </div>
+        <button type="submit">Login</button>
+      </form>
     </div>
   );
 };
