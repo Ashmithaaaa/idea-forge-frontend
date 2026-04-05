@@ -6,13 +6,21 @@ const BASE_URL = "https://idea-forge-backend.onrender.com";
 const Signup = () => {
   const navigate = useNavigate();
 
-  const [name, setName] = useState("");
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
-  const [skills, setSkills] = useState("");
+  const [form, setForm] = useState({
+    name: "",
+    email: "",
+    password: "",
+    skills: "",
+  });
+
+  const handleChange = (e) => {
+    setForm({ ...form, [e.target.name]: e.target.value });
+  };
 
   const handleSignup = async (e) => {
     e.preventDefault();
+
+    console.log("Sending:", form); // ✅ debug
 
     try {
       const res = await fetch(`${BASE_URL}/api/auth/signup`, {
@@ -20,34 +28,26 @@ const Signup = () => {
         headers: {
           "Content-Type": "application/json",
         },
-
-        // 🔥 MOST IMPORTANT FIX
-        body: JSON.stringify({
-          username: name, // ✅ backend expects username
-          email: email,
-          password: password,
-          skills: skills,
-        }),
+        body: JSON.stringify(form),
       });
 
-      // ✅ SAFE JSON PARSE
-      let data = null;
+      let data = {};
       try {
         data = await res.json();
-      } catch (err) {
-        console.warn("No JSON response");
-      }
+      } catch {}
+
+      console.log("Response:", res.status, data); // ✅ debug
 
       if (!res.ok) {
-        alert(data?.message || "Signup failed");
+        alert(data.message || "Signup failed");
         return;
       }
 
-      alert("Signup successful ✅");
+      alert("Signup successful");
       navigate("/login");
-    } catch (error) {
-      console.error(error);
-      alert("Signup error ❌");
+    } catch (err) {
+      console.error("Signup error:", err);
+      alert("Something went wrong");
     }
   };
 
@@ -65,51 +65,47 @@ const Signup = () => {
         className="card"
         style={{ maxWidth: "400px", width: "100%", padding: "30px" }}
       >
-        <h2 className="page-title">Create Account</h2>
+        <h2>Create Account</h2>
 
         <form onSubmit={handleSignup}>
           <input
-            className="input"
+            name="name"
             placeholder="Name"
-            value={name}
-            onChange={(e) => setName(e.target.value)}
+            onChange={handleChange}
+            className="input"
             required
           />
-
           <input
-            className="input"
-            type="email"
+            name="email"
             placeholder="Email"
-            value={email}
-            onChange={(e) => setEmail(e.target.value)}
+            onChange={handleChange}
+            className="input"
             required
           />
-
           <input
-            className="input"
+            name="password"
             type="password"
             placeholder="Password"
-            value={password}
-            onChange={(e) => setPassword(e.target.value)}
+            onChange={handleChange}
+            className="input"
             required
           />
-
           <input
-            className="input"
+            name="skills"
             placeholder="Skills"
-            value={skills}
-            onChange={(e) => setSkills(e.target.value)}
+            onChange={handleChange}
+            className="input"
           />
 
           <button
             className="primary-btn"
-            style={{ width: "100%", marginTop: "16px" }}
+            style={{ width: "100%", marginTop: "10px" }}
           >
             Sign Up
           </button>
         </form>
 
-        <p style={{ marginTop: "16px" }}>
+        <p>
           Already have an account? <Link to="/login">Login</Link>
         </p>
       </div>
